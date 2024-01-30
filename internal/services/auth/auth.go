@@ -3,8 +3,7 @@ package auth
 import (
 	"errors"
 	"fmt"
-	"golang.org/x/exp/slog"
-
+	"github.com/kholodmv/GophKeeper/internal/logger"
 	"github.com/kholodmv/GophKeeper/internal/models"
 	"github.com/kholodmv/GophKeeper/internal/utils/jwt"
 	"golang.org/x/crypto/bcrypt"
@@ -13,7 +12,6 @@ import (
 
 // Auth - registration and authentication service
 type Auth struct {
-	log      *slog.Logger
 	provider UserProvider
 	tokenTTL time.Duration
 }
@@ -28,24 +26,22 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 
 // NewAuth - auth constructor
 func NewAuth(
-	log *slog.Logger,
 	provider UserProvider,
 	tokenTTL time.Duration,
 ) *Auth {
 	return &Auth{
 		provider: provider,
-		log:      log,
 		tokenTTL: tokenTTL, // Lifetime of returned tokens
 	}
 }
 
 // CreateUser - create new user
 func (a *Auth) CreateUser(auth *models.Auth) error {
-	a.log.Info("registering user")
+	logger.Log.Info("registering user")
 
 	passHash, err := bcrypt.GenerateFromPassword([]byte(auth.Password), bcrypt.DefaultCost)
 	if err != nil {
-		a.log.Error("failed to generate password hash", err)
+		logger.Log.Error("failed to generate password hash", err)
 		return fmt.Errorf("%s: %w", "Auth.RegisterNewUser.CreatePassHash", err)
 	}
 
@@ -57,7 +53,7 @@ func (a *Auth) CreateUser(auth *models.Auth) error {
 	err = a.provider.CreateUser(user)
 
 	if err != nil {
-		a.log.Error("Auth.RegisterUser: ", err)
+		logger.Log.Error("Auth.RegisterUser: ", err)
 		return fmt.Errorf("%s: %w", "Auth.RegisterNewUser", err)
 	}
 
@@ -66,26 +62,26 @@ func (a *Auth) CreateUser(auth *models.Auth) error {
 
 // Login - user authentication
 func (a *Auth) Login(auth *models.Auth) (string, error) {
-	a.log.Info("login user")
+	logger.Log.Info("login user")
 	// Getting the user from the database
 	user, err := a.provider.ReadUser(auth.Login)
 	if err != nil {
-		a.log.Error("Auth.Login: ", err)
+		logger.Log.Error("Auth.Login: ", err)
 		return "", fmt.Errorf("%s: %w", "Auth.Login: ", err)
 	}
 
 	// Checking the correctness of the received password
 	if err := bcrypt.CompareHashAndPassword(user.Password, []byte(auth.Password)); err != nil {
-		a.log.Info("invalid credentials", err)
+		logger.Log.Info("invalid credentials", err)
 		return "", fmt.Errorf("%s: %w", "Auth.Login: ", ErrInvalidCredentials)
 	}
 
-	a.log.Info("user logged in successfully")
+	logger.Log.Info("user logged in successfully")
 
 	// Create an authorization token
 	token, err := jwt.NewToken(user, a.tokenTTL)
 	if err != nil {
-		a.log.Error("failed to generate token", err)
+		logger.Log.Error("failed to generate token", err)
 
 		return "", fmt.Errorf("%s: %w", "Auth.Login: ", err)
 	}

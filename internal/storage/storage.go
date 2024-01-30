@@ -9,7 +9,7 @@ import (
 
 // ErrDuplicate - error duplicate
 var (
-	ErrDuplicate = errors.New("duplicate key value violates unique")
+	errDuplicate = errors.New("duplicate key value violates unique")
 )
 
 type Storage struct {
@@ -27,8 +27,8 @@ func NewStorage(conf string) *Storage {
 func (s *Storage) CreateUser(user *models.User) error {
 	result := s.db.Create(user)
 
-	if result.Error != nil && errors.Is(result.Error, ErrDuplicate) {
-		return ErrDuplicate
+	if result.Error != nil && errors.Is(result.Error, errDuplicate) {
+		return errDuplicate
 	} else if result.Error != nil {
 		return result.Error
 	}
@@ -55,8 +55,8 @@ func (s *Storage) CreateSecret(secret *models.Secret) error {
 		}
 		return nil
 	})
-	if err != nil && errors.Is(err, ErrDuplicate) {
-		return ErrDuplicate
+	if err != nil && errors.Is(err, errDuplicate) {
+		return errDuplicate
 	} else if err != nil {
 		return err
 	}

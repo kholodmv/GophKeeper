@@ -6,14 +6,14 @@ import (
 	"net/http"
 )
 
+var (
+	req struct {
+		Title string `json:"title"`
+	}
+)
+
 // ReadSecret - read secret by name
 func (h *Handler) ReadSecret(ctx *gin.Context) {
-	var (
-		req struct {
-			Title string `json:"title"`
-		}
-	)
-
 	if err := ctx.ShouldBindJSON(&req); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return

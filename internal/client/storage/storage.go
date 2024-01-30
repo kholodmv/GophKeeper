@@ -48,6 +48,9 @@ func (t *TokenStorage) LoadToken() (string, error) {
 
 // GetToken returns the current token.
 func (t *TokenStorage) GetToken() string {
-	tokenContent, _ := t.LoadToken()
+	tokenContent, err := t.LoadToken()
+	if err != nil {
+		fmt.Println("Error when receiving token:", err)
+	}
 	return tokenContent
 }

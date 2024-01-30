@@ -1,7 +1,6 @@
 package config
 
 import (
-	"flag"
 	"time"
 )
 
@@ -12,11 +11,9 @@ type Config struct {
 }
 
 func UseServerStartParams() *Config {
-	var c *Config
-
-	flag.StringVar(&c.RunAddress, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&c.DatabaseURI, "d", "", "connection string to postgres db")
-	flag.DurationVar(&c.TokenTTL, "t", 10*time.Hour, "token TTL")
-
-	return c
+	return &Config{
+		RunAddress:  "localhost:8080",
+		DatabaseURI: "host='localhost' user='postgres' password='123' dbname='postgres' sslmode=disable",
+		TokenTTL:    10 * time.Hour,
+	}
 }

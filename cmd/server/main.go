@@ -14,7 +14,8 @@ import (
 
 func main() {
 	cfg := config.UseServerStartParams()
-	handler := handlers.NewHandler(cfg)
+	rootCtx := context.Background()
+	handler := handlers.NewHandler(cfg, rootCtx)
 	server := &http.Server{
 		Addr:    cfg.RunAddress,
 		Handler: router.Router(handler),

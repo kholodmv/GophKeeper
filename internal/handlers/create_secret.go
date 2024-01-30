@@ -9,30 +9,30 @@ import (
 )
 
 // CreateSecret - create secret
-func (h *Handler) CreateSecret(ctx *gin.Context) {
+func (h *Handler) CreateSecret(gctx *gin.Context) {
 	var (
 		secret *models.Secret
 	)
 
-	body, err := io.ReadAll(ctx.Request.Body)
+	body, err := io.ReadAll(gctx.Request.Body)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, err.Error())
+		gctx.JSON(http.StatusInternalServerError, err.Error())
 	}
 
 	err = json.Unmarshal(body, &secret)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		gctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	userID, _ := ctx.Get("userID")
+	userID, _ := gctx.Get("userID")
 	secret.UserID = userID.(uint)
 
 	err = h.KeeperService.CreateSecret(secret)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
+		gctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"message": "the new secret has been created!"})
+	gctx.JSON(http.StatusCreated, gin.H{"message": "the new secret has been created!"})
 }
